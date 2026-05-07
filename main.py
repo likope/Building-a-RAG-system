@@ -7,6 +7,6 @@ from langchain.ollama import ChatOllama
 test_input = "Hello, what is an LLM?"
 
 #definisco il modello di chat
-llm = 
+llm = ""
 
 
