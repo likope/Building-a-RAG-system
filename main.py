@@ -25,9 +25,12 @@ llm = ChatOllama(
     base_url = "http://localhost:11434"
 )
 
-def history_update(state):
-    state["history"] = "user_input: "+state["input"]+" output: "+state["output"]
-    return state["history"]
+def history_update(state: dict) -> str:
+    prev = state["history"]
+    new_turn = f"user: {state['input']}\nassistant: {state['output']}"
+    if prev == "":
+        return new_turn
+    return prev + "\n" + new_turn
 
 chain = RunnableAssign({"output": prompt|llm|StrOutputParser()}) | RunnableAssign({"history": history_update})
 
