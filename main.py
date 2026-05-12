@@ -6,7 +6,7 @@ from langchain_core.runnables import RunnableAssign
 
 user_input=""
 
-dict = {
+state = {
     "input": user_input,
     "output": "",
     "history": "",
@@ -25,13 +25,17 @@ llm = ChatOllama(
     base_url = "http://localhost:11434"
 )
 
+def history_update(state):
+    state["history"] = "user_input: "+state["input"]+" output: "+state["output"]
+    return state["history"]
 
-chain = RunnableAssign({"output": prompt|llm|StrOutputParser()})
+chain = RunnableAssign({"output": prompt|llm|StrOutputParser()}) | RunnableAssign({"history": history_update})
 
 
 if __name__ == "__main__":
     i=0
     while True:
         user_input = input("Inserisci il prompt, digita 'exit' per terminare\n")
-        response = chain.invoke(dict)
-        print(response)
+        state["input"] = user_input
+        state = chain.invoke(state)
+        print(state)
