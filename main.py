@@ -1,5 +1,8 @@
-from llm import GeminiLlm
+from assistant import Assistente
 
-gemini = GeminiLlm()
-response = gemini.invoke("oggi che giorno è?")
-print(response)
+if __name__ == "__main__":
+    assistant = Assistente()
+    while True:
+        user_input = input("Inserisci il prompt: ")
+        risposta = assistant.Ask(user_input)
+        print(risposta)
