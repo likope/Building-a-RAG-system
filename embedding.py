@@ -1,4 +1,5 @@
-import client_embedding, path
+import client_embedding
+import path
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
@@ -8,7 +9,7 @@ class Embedding:
     def __init__(self):
         self.embedding_model = client_embedding.embedding_model
         self.path_documents = path.path_documents
-        self.splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=200)
+        self.splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
 
     def load_documents(self):
         self.documents = PyMuPDFLoader(self.path_documents / "document.pdf").load()
