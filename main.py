@@ -5,11 +5,18 @@ File main dove viene eseguito il programma, qui viene definito un ciclo infinito
 
 from assistant import Assistant
 from judge import Judge
-
-assistente  = Assistant()
-giudice     = Judge()
+from embedding import Embedding
 
 if __name__ == "__main__":
+
+    assistente  = Assistant()
+    giudice     = Judge()
+    embedding   = Embedding()
+
+    vector_store = embedding.do_embedding()
+    # Metadati dell'indice
+    print(vector_store.index.ntotal)   # numero vettori
+    print(vector_store.index.d)        # dimensionalità (bge-m3 → 1024)
 
     history_summary = ""
     risposta_giudice = ""
