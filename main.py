@@ -13,10 +13,9 @@ if __name__ == "__main__":
     giudice     = Judge()
     embedding   = Embedding()
 
+    
+
     vector_store = embedding.do_embedding()
-    # Metadati dell'indice
-    print(vector_store.index.ntotal)   # numero vettori
-    print(vector_store.index.d)        # dimensionalità (bge-m3 → 1024)
 
     history_summary = ""
     risposta_giudice = ""
