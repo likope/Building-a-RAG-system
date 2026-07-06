@@ -76,10 +76,11 @@ class Assistant:
         """
         f che gestisce il riassunto della storia della conversazione tramite l llm.
         """
+        self.summary_llm = params_llm(temperature=0.1)
         self.template_history_summary = """Il tuo compito è quello di creare un riassunto della storia di una conversazione per un altra llm.
         storia = {history}."""
         self.prompt_history_summary = PromptTemplate.from_template(self.template_history_summary)
-        self.history_summary_chain = self.prompt_history_summary | self.llm | StrOutputParser()
+        self.history_summary_chain = self.prompt_history_summary | self.summary_llm | StrOutputParser()
         self.history_summary = self.history_summary_chain.invoke(self.current_state)
         return self.history_summary
 
