@@ -7,23 +7,22 @@ class Judge:
 
     def __init__(self):
         """
-        Costruttore statico che inizializza e crea il prompt template.
+        constructor of Judge class, which initializes the necessary attributes for the evaluation of the LLM's response.
         """
 
         self.judge_output = ""
         self.llm = params_llm(temperature=0.1)
-        self.template_judge = """Il tuo compito è quello di valutare un primo llm generatore di risposta seguendo questo template con valori assoluti tra 0 e 3: accuratezza nei confronti del contesto\n, risposta in funzione della domanda\n, capacità di fornire riferimenti in funzione del contesto.\n
+        self.template_judge = """Your task is to evaluate the response of the LLM based on the input, output, history, and context provided. You must provide a detailed argumentation for your evaluation. The evaluation should be divided into two parts: the first part should be argumentative, and the second part should consist of a single line that starts with the symbol "$" and contains a numerical judgment in the format: accuracy, response, references.\n
         input = {input},
-        llm_output = {output}
-        storia = {history},
-        contesto = {context}
-        Devi dividere il giudizio in due parti, la prima deve essere una argomentativa, NELLA SECONDA PARTE DEVI FORNIRE UNA SOLA RIGA CHE DEVE INIZIARE OBBLIGATORIAMENTE CON QUESTO SIMBOLO: "$" DOVE CITI UN GIUDIZIO NUMERICO, SEPARATO DA UNA VIRGOLA, IN QUESTO MODO: accuratezza, risposta, riferimenti.
+        llm_output = {output},
+        history = {history},
+        context = {context},
         """
         self.prompt_judge = PromptTemplate.from_template(self.template_judge)
 
     def get_evaluation(self, current_state: dict):
         """
-        f che si occupa di fare valutare l attuale risposta dell llm a un llm as a judge.
+        f that is responsible for evaluating the current response of the LLM by a judge LLM.
         """
         
         self.judge_chain = self.prompt_judge | self.llm | StrOutputParser()

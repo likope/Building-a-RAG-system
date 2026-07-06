@@ -14,20 +14,20 @@ class Embedding:
     def load_documents(self):
         documents = []
         for pdf_path in sorted(self.path_documents.glob("*.pdf")):
-            print(f"Carico il file: {pdf_path}")
+            print(f"Upload file: {pdf_path}")
             documents.extend(PyMuPDFLoader(pdf_path).load())
         return documents
     
     def save_vectorstore(self, vectorstore, path):
-        print("PAth: ", path)
+        print("Path: ", path)
         vectorstore.save_local(path)
-        print(f"Vectorstore salvato in: {path}")
+        print(f"Vectorstore saved in: {path}")
 
     def do_embedding(self):
         docs = self.load_documents()
-        print("inizio embedding")
+        print("start embedding")
         chunks = self.splitter.split_documents(docs)
         vectorstore = FAISS.from_documents(chunks, self.embedding_model)
-        print("Fatto Embedding")
+        print("Done!")
         self.save_vectorstore(vectorstore, "vectorstore")
         return vectorstore

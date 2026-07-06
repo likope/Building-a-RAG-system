@@ -5,14 +5,11 @@ from langchain_core.output_parsers import StrOutputParser
 from embedding import Embedding
 from operator import itemgetter
 
-embedding = Embedding()
-
-vectorstore = embedding.do_embedding()
 class Assistant:
 
     def __init__(self):
         """
-        Costruttore statico dell assistente, inizializza tutte le variabili e costruisce il template del prompt.
+        Costructor of Assistant class, which initializes the necessary attributes for the conversation with the LLM.
         """
         self.history = ""
         self.output = ""
@@ -24,30 +21,31 @@ class Assistant:
         context = {context},"""
         self.prompt = PromptTemplate.from_template(self.prompt_template)
         self.documents = ""
+        self.embedding = Embedding()
     
     def get_actual_history(self, _):
         """
-        f che restituisce l'attuale storia della conversazione.
+        f that returns the current conversation history.
         """
         return self.history
     
     def append_history(self, user_input: str):
         """
-        f che aggiorna l attuale storia della conversazione.
+        f that appends the current input, output, and judge output to the conversation history.
         """
         self.history += f"input = {user_input}, " + f"output = {self.output}, " + f"judge_output = {self.judge_output}"
         return self.history
     
     def reset_history(self):
         """
-        f che resetta la storia della conversazione.
+        f that resets the conversation history.
         """
         self.history = ""
         return self.history
     
     def update_current_state(self, user_input: str):
         """
-        f che si occupa di aggiornare lo stato della dict da passare al llm.
+        f that updates the current state dictionary to be passed to the LLM.
         """
 
         self.current_state = {
@@ -68,30 +66,30 @@ class Assistant:
         """
         f che si occupa di restituire il contesto in base alla query dell utente.
         """
-        docs = vectorstore.similarity_search(user_input, k=3)
+        vector_store = self.embedding.do_embedding()
+        docs = vector_store.similarity_search(user_input, k=5)
         self.documents = ", ".join([doc.page_content for doc in docs])
         return self.documents
     
     def get_history_summary(self):
         """
-        f che gestisce il riassunto della storia della conversazione tramite l llm.
+        f that generates a summary of the conversation history to be passed to the LLM.
         """
         self.summary_llm = params_llm(temperature=0.1)
         self.template_history_summary = """Il tuo compito è quello di creare un riassunto della storia di una conversazione per un altra llm.
-        storia = {history}."""
+        history = {history}."""
         self.prompt_history_summary = PromptTemplate.from_template(self.template_history_summary)
         self.history_summary_chain = self.prompt_history_summary | self.summary_llm | StrOutputParser()
         self.history_summary = self.history_summary_chain.invoke(self.current_state)
         return self.history_summary
 
-    def Ask(self, user_input: str, history_summary: str, risposta_giudice: str):
+    def Ask(self, user_input: str, history_summary: str, answer_judge: str):
         """
-        f che gestisce la creazione del prompt e la risposta del llm.
+        f that takes the user input, the history summary, and the judge's response as input, and returns the LLM's response and the current state.
         """
 
-        self.judge_output = risposta_giudice
+        self.judge_output = answer_judge
         self.update_current_state(user_input)
-        print(f"selfcurrentstate = {self.current_state}") #debug, parametri che vengono passati al modello llm
 
         if history_summary != "":
             self.history = history_summary
@@ -107,5 +105,4 @@ class Assistant:
         self.output = self.chain.invoke(self.current_state)
         self.history = self.append_history(user_input)
         self.update_current_state(user_input)
-        print(f"selfcurrentstate = {self.current_state}") #debug, parametri che vengono passati al modello llm
         return self.output, self.current_state
