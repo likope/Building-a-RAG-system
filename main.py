@@ -6,14 +6,16 @@ File main dove viene eseguito il programma, qui viene definito un ciclo infinito
 from assistant import Assistant
 from judge import Judge
 from embedding import Embedding
+from eval import Eval
 
 if __name__ == "__main__":
 
     assistente  = Assistant()
     giudice     = Judge()
     embedding   = Embedding()
+    eval = Eval()
 
-    
+
 
     vector_store = embedding.do_embedding()
 
@@ -34,6 +36,8 @@ if __name__ == "__main__":
 
         risposta, current_state = assistente.Ask(user_input, history_summary, risposta_giudice)
         risposta_giudice = giudice.get_evaluation(current_state)
+        current_state["judge_output"] = risposta_giudice
         print(f"Risposta llm:\n{risposta}\n")
         print(f"Risposta giudice:\n{risposta_giudice}\n")
+        eval.evaluate_judge(current_state)
         i = i+1
