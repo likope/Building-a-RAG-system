@@ -1,4 +1,4 @@
-from client_assistente import params_llm
+from client_assistant import params_llm
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.output_parsers import StrOutputParser
@@ -7,7 +7,7 @@ from operator import itemgetter
 
 class Assistant:
 
-    def __init__(self):
+    def __init__(self, n_turns: int):
         """
         Costructor of Assistant class, which initializes the necessary attributes for the conversation with the LLM.
         """
@@ -83,7 +83,7 @@ class Assistant:
         self.history_summary = self.history_summary_chain.invoke(self.current_state)
         return self.history_summary
 
-    def Ask(self, user_input: str, history_summary: str, answer_judge: str):
+    def Ask(self, user_input: str, history_summary: str, answer_judge: str, n_turns: int):
         """
         f that takes the user input, the history summary, and the judge's response as input, and returns the LLM's response and the current state.
         """
@@ -94,7 +94,7 @@ class Assistant:
         if history_summary != "":
             self.history = history_summary
 
-        self.chain = (
+        self.chain_with_embedding = (
             RunnablePassthrough.assign(history = self.get_actual_history,
                                        context = itemgetter("input") | RunnableLambda(self.get_context))
             |self.prompt
@@ -102,7 +102,23 @@ class Assistant:
             |StrOutputParser()
         )
 
-        self.output = self.chain.invoke(self.current_state)
-        self.history = self.append_history(user_input)
-        self.update_current_state(user_input)
-        return self.output, self.current_state
+        self.chain_without_embedding = (
+            RunnablePassthrough.assign(history = self.get_actual_history,
+                                       context = itemgetter("input") | RunnableLambda(self.get_actual_context))
+            |self.prompt
+            |self.llm
+            |StrOutputParser()
+        )
+
+        if n_turns == 0:
+
+            self.output = self.chain_with_embedding.invoke(self.current_state)
+            self.history = self.append_history(user_input)
+            self.update_current_state(user_input)
+            return self.output, self.current_state
+        
+        else:
+            self.output = self.chain_whitout_embedding.invoke(self.current_state)
+            self.history = self.append_history(user_input)
+            self.update_current_state(user_input)
+            return self.output, self.current_state
