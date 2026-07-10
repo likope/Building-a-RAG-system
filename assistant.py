@@ -7,7 +7,7 @@ from operator import itemgetter
 
 class Assistant:
 
-    def __init__(self, n_turns: int):
+    def __init__(self):
         """
         Costructor of Assistant class, which initializes the necessary attributes for the conversation with the LLM.
         """
@@ -55,18 +55,12 @@ class Assistant:
             "context": self.documents,
             "judge_output": self.judge_output
         }
-
-    def get_actual_context(self):
-        """
-        f che restituisce il contesto attuale della conversazione.
-        """
-        return self.documents
     
     def get_context(self, user_input: str):
         """
         f che si occupa di restituire il contesto in base alla query dell utente.
         """
-        vector_store = self.embedding.do_embedding()
+        
         docs = vector_store.similarity_search(user_input, k=5)
         self.documents = ", ".join([doc.page_content for doc in docs])
         return self.documents
@@ -83,7 +77,7 @@ class Assistant:
         self.history_summary = self.history_summary_chain.invoke(self.current_state)
         return self.history_summary
 
-    def Ask(self, user_input: str, history_summary: str, answer_judge: str, n_turns: int):
+    def Ask(self, user_input: str, history_summary: str, answer_judge: str, embedding: bool):
         """
         f that takes the user input, the history summary, and the judge's response as input, and returns the LLM's response and the current state.
         """
@@ -103,14 +97,13 @@ class Assistant:
         )
 
         self.chain_without_embedding = (
-            RunnablePassthrough.assign(history = self.get_actual_history,
-                                       context = itemgetter("input") | RunnableLambda(self.get_actual_context))
+            RunnablePassthrough.assign(history = self.get_actual_history)
             |self.prompt
             |self.llm
             |StrOutputParser()
         )
 
-        if n_turns == 0:
+        if embedding == True:
 
             self.output = self.chain_with_embedding.invoke(self.current_state)
             self.history = self.append_history(user_input)
@@ -118,7 +111,7 @@ class Assistant:
             return self.output, self.current_state
         
         else:
-            self.output = self.chain_whitout_embedding.invoke(self.current_state)
+            self.output = self.chain_without_embedding.invoke(self.current_state)
             self.history = self.append_history(user_input)
             self.update_current_state(user_input)
             return self.output, self.current_state

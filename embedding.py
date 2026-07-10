@@ -4,7 +4,7 @@ from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 
-
+path_for_vs = "vectorstore"
 class Embedding:
     def __init__(self):
         self.embedding_model = embedding_model
@@ -29,5 +29,5 @@ class Embedding:
         chunks = self.splitter.split_documents(docs)
         vectorstore = FAISS.from_documents(chunks, self.embedding_model)
         print("Done!")
-        self.save_vectorstore(vectorstore, "vectorstore")
+        self.save_vectorstore(vectorstore, path_for_vs)
         return vectorstore

@@ -1,6 +1,6 @@
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from client_assistente import params_llm
+from client_assistant import params_llm
 
 
 class Judge:
@@ -12,7 +12,7 @@ class Judge:
 
         self.judge_output = ""
         self.llm = params_llm(temperature=0.1)
-        self.template_judge = """Your task is to evaluate the response of the LLM based on the input, output, history, and context provided. You must provide a detailed argumentation for your evaluation. The evaluation should be divided into two parts: the first part should be argumentative, and the second part should consist of a single line that starts with the symbol "$" and contains a numerical judgment in the format: accuracy, response, references.\n
+        self.template_judge = """Your task is to evaluate the response of the LLM based on the input, output, history, and context provided. You must provide a detailed argumentation for your evaluation. The evaluation should be divided into two parts: the first part should be argumentative, and the second part should consist of a single line that starts with the symbol "$" and contains a numerical judgment in scale 0-3 (only int) in this EXACT format: $numeric_judment_for_accuracy,numeric_judment_fot_response,numeric_judment_for_reference.\n
         input = {input},
         llm_output = {output},
         history = {history},

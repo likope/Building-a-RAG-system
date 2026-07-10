@@ -18,14 +18,14 @@ class Eval:
         """
         f that evaluates the output of the LLM by checking if all the quoted citations in the output are present in the context. It ignores citations that contain mathematical symbols.
         """
-        simboli_math = {"∫", "Γ", "√"}
+        simbols_math = {"∫", "Γ", "√"}  
         context = current_state["context"]
         output = current_state["output"]
         cit = re.findall(r'"([^"]*)"', output)
         cit_norm = [self.normalize_text(c) for c in cit]
         context_norm = self.normalize_text(context)
         for c in cit_norm:
-            if any(sym in c for sym in simboli_math):
+            if any(sym in c for sym in simbols_math):
                 continue
             elif c not in context_norm:
                 print(f"Cit not in the context: {c}")
@@ -38,8 +38,8 @@ class Eval:
         judge_output = current_state["judge_output"]
         match = re.findall(r"\$\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)", judge_output)
         if match:
-            accuratezza, risposta, riferimenti = match[-1]
-            return accuratezza, risposta, riferimenti
+            accuracy, answer, cit = match[-1]
+            return accuracy, answer, cit
         else:
             return None, None, None
         
