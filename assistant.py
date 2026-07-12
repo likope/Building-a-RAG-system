@@ -60,8 +60,8 @@ class Assistant:
         """
         f che si occupa di restituire il contesto in base alla query dell utente.
         """
-        
-        docs = vector_store.similarity_search(user_input, k=5)
+        vectorstore = self.embedding.load_vectorstore()
+        docs = vectorstore.similarity_search(user_input, k=5)
         self.documents = ", ".join([doc.page_content for doc in docs])
         return self.documents
     
@@ -77,11 +77,10 @@ class Assistant:
         self.history_summary = self.history_summary_chain.invoke(self.current_state)
         return self.history_summary
 
-    def Ask(self, user_input: str, history_summary: str, answer_judge: str, embedding: bool):
+    def Ask(self, user_input: str, history_summary: str, answer_judge: str):
         """
         f that takes the user input, the history summary, and the judge's response as input, and returns the LLM's response and the current state.
         """
-
         self.judge_output = answer_judge
         self.update_current_state(user_input)
 
@@ -96,22 +95,7 @@ class Assistant:
             |StrOutputParser()
         )
 
-        self.chain_without_embedding = (
-            RunnablePassthrough.assign(history = self.get_actual_history)
-            |self.prompt
-            |self.llm
-            |StrOutputParser()
-        )
-
-        if embedding == True:
-
-            self.output = self.chain_with_embedding.invoke(self.current_state)
-            self.history = self.append_history(user_input)
-            self.update_current_state(user_input)
-            return self.output, self.current_state
-        
-        else:
-            self.output = self.chain_without_embedding.invoke(self.current_state)
-            self.history = self.append_history(user_input)
-            self.update_current_state(user_input)
-            return self.output, self.current_state
+        self.output = self.chain_with_embedding.invoke(self.current_state)
+        self.history = self.append_history(user_input)
+        self.update_current_state(user_input)
+        return self.output, self.current_state

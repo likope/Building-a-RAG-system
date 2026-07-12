@@ -23,6 +23,10 @@ class Embedding:
         vectorstore.save_local(path)
         print(f"Vectorstore saved in: {path}")
 
+    def load_vectorstore(self):
+        vectorstore = FAISS.load_local(path_for_vs, self.embedding_model, allow_dangerous_deserialization=True)
+        return vectorstore
+
     def do_embedding(self):
         docs = self.load_documents()
         print("start embedding")
@@ -30,4 +34,5 @@ class Embedding:
         vectorstore = FAISS.from_documents(chunks, self.embedding_model)
         print("Done!")
         self.save_vectorstore(vectorstore, path_for_vs)
+        vectorstore = self.load_vectorstore()
         return vectorstore
