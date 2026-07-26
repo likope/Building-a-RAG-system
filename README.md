@@ -5,7 +5,7 @@ It uses ollama with deepseekR1-8B model, and bge 3 embedding model, but can be c
 - next clone the repo and run on terminal "pip install -r requirements.txt" to install all the dependencies,
 - now you can run the script on terminal with "python main_but_gradio.py".
 
-# Feature:
+# Features:
 - LLM Assistant;
 - LLM as Judge;
 - Vectorstore;
