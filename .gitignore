@@ -1,4 +1,4 @@
-# Secrets - mai committare API keys
+# Secrets
 .env
 .env.*
 !.env.example
@@ -43,3 +43,6 @@ eval_log.jsonl
 
 # Jupyter
 .ipynb_checkpoints/
+
+vectorstore/
+documents/
