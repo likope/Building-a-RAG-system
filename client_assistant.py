@@ -12,7 +12,7 @@ from langchain_ollama import ChatOllama
 #    )
 #    return llm
 
-def params_llm(model: str = "deepseek-r1:14b", temperature: float = 0.8):
+def params_llm(model: str = "deepseek-r1:8b", temperature: float = 0.8):
     llm = ChatOllama(
         model = model,
         temperature = temperature

@@ -16,7 +16,8 @@ if __name__ == "__main__":  #if this file its run as main
     limit_history_turn  = 2     #inizializzation of turn limits
 
     while True:             #while:
-        embeddings = 0
+        embedding_request = 0
+        history_summary = ""    #reset of history summary
         if n_turns > limit_history_turn:    #if history is too long
             history_summary = assistant.get_history_summary()   #get a summary of the history
             n_turns = 1
@@ -27,9 +28,9 @@ if __name__ == "__main__":  #if this file its run as main
             break
         if user_input.lower() == "reload the context":
             vectorstore = embedding.do_embedding()
-            embeddings = 1
+            embedding_request = 1
 
-        if embeddings == 0:
+        if embedding_request == 0:
             answer_llm, current_state = assistant.Ask(user_input, history_summary, answer_judge)
             answer_judge = judge.get_evaluation(current_state)
             current_state["judge_output"] = answer_judge

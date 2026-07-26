@@ -9,7 +9,7 @@ class Embedding:
     def __init__(self):
         self.embedding_model = embedding_model
         self.path_documents = path_documents
-        self.splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+        self.splitter = RecursiveCharacterTextSplitter(chunk_size=850, chunk_overlap=200)
 
     def load_documents(self):
         documents = []

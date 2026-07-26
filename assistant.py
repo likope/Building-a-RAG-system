@@ -15,7 +15,8 @@ class Assistant:
         self.output = ""
         self.judge_output = ""
         self.llm = params_llm()
-        self.prompt_template = """Your task is to respond as coherently as possible to the input, based on the history of the conversation and the context provided. Every factual statement must be accompanied by a verbatim quote from the document, enclosed in quotation marks.
+        self.prompt_template = """Your task is to respond as coherently as possible to the input, based on the history of the conversation and the context provided. Every factual statement must be accompanied by a verbatim quote from the document, enclosed in quotation marks.\n
+        IF CONTEXT = 'NO DOCS RELEVANT IN CONTEXT' THEN ANSWER THAT YOU DON'T HAVE RELEVANT DOCUMENTS IN CONTEXT AND DON'T ALLUCINATE.\n
         input = {input},
         history = {history},
         context = {context},"""
@@ -61,8 +62,15 @@ class Assistant:
         f che si occupa di restituire il contesto in base alla query dell utente.
         """
         vectorstore = self.embedding.load_vectorstore()
-        docs = vectorstore.similarity_search(user_input, k=5)
-        self.documents = ", ".join([doc.page_content for doc in docs])
+        docs = vectorstore.similarity_search_with_score(user_input, k=5)
+        for doc, score in docs:
+            print(f"score={score:.3f}  |  {doc.page_content[:80]}")
+        min_score = 1.15
+        docs_relevant = [doc for doc, score in docs if score < min_score]
+        if not docs_relevant:
+            self.documents = "NO DOCS RELEVANT IN CONTEXT"
+            return self.documents
+        self.documents = ", ".join([doc.page_content for doc in docs_relevant])
         return self.documents
     
     def get_history_summary(self):
@@ -70,8 +78,11 @@ class Assistant:
         f that generates a summary of the conversation history to be passed to the LLM.
         """
         self.summary_llm = params_llm(temperature=0.1)
-        self.template_history_summary = """Il tuo compito è quello di creare un riassunto della storia di una conversazione per un altra llm.
-        history = {history}."""
+        self.template_history_summary = self.template_history_summary = """You are summarizing a conversation history for another LLM.
+        Write a brief summary that captures what the user asked and what was answered, IN YOUR OWN WORDS.
+        Do NOT include any direct quotes, quoted text, or page references from the documents.
+        Report only the meaning of the exchange, never the exact wording of any cited passage.
+        history = {history}"""
         self.prompt_history_summary = PromptTemplate.from_template(self.template_history_summary)
         self.history_summary_chain = self.prompt_history_summary | self.summary_llm | StrOutputParser()
         self.history_summary = self.history_summary_chain.invoke(self.current_state)
@@ -86,7 +97,7 @@ class Assistant:
 
         if history_summary != "":
             self.history = history_summary
-
+            
         self.chain_with_embedding = (
             RunnablePassthrough.assign(history = self.get_actual_history,
                                        context = itemgetter("input") | RunnableLambda(self.get_context))
@@ -98,4 +109,4 @@ class Assistant:
         self.output = self.chain_with_embedding.invoke(self.current_state)
         self.history = self.append_history(user_input)
         self.update_current_state(user_input)
-        return self.output, self.current_state
+        return self.output, self.current_state, self.documents
