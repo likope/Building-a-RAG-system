@@ -3,7 +3,7 @@ import re
 
 class Eval:
     def __init__(self):
-        self.assistant = Assistant()
+        pass
     
     def normalize_text(self, text: str):
         """
@@ -47,4 +47,4 @@ class Eval:
         """"""
         result_parser = self.parser(current_state)
         result_evaluate = self.evaluate(current_state)
-        print(f"Parser result: {result_parser}, Evaluate result: {result_evaluate}")
+        print(f"\nParser result: {result_parser}, \nEvaluate result: {result_evaluate}")

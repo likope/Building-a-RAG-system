@@ -1,3 +1,4 @@
 from langchain_ollama import OllamaEmbeddings
 
-embedding_model = OllamaEmbeddings(model="bge-m3")
+embedding_model = OllamaEmbeddings(model="bge-m3",
+                                   base_url = "http://100.89.85.39:11434")

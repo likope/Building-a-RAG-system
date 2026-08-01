@@ -15,6 +15,7 @@ from langchain_ollama import ChatOllama
 def params_llm(model: str = "deepseek-r1:8b", temperature: float = 0.8):
     llm = ChatOllama(
         model = model,
-        temperature = temperature
+        temperature = temperature,
+        base_url = "http://100.89.85.39:11434"
     )
     return llm

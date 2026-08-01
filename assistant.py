@@ -12,16 +12,13 @@ class Assistant:
         Costructor of Assistant class, which initializes the necessary attributes for the conversation with the LLM.
         """
         self.history = ""
-        self.output = ""
-        self.judge_output = ""
         self.llm = params_llm()
-        self.prompt_template = """Your task is to respond as coherently as possible to the input, based on the history of the conversation and the context provided. Every factual statement must be accompanied by a verbatim quote from the document, enclosed in quotation marks.\n
-        IF CONTEXT = 'NO DOCS RELEVANT IN CONTEXT' THEN ANSWER THAT YOU DON'T HAVE RELEVANT DOCUMENTS IN CONTEXT AND DON'T ALLUCINATE.\n
+        self.prompt_template = """You are a LLM, you have to answer properly based on the user input, you can look history of your conversation and I'll give you the context that the user want your answer are based.\n
+        If context = 'NO DOCS RELEVANT IN CONTEXT' is because there aren't properly context on this user input, say at the user that there isn't properly context.\n
         input = {input},
         history = {history},
         context = {context},"""
         self.prompt = PromptTemplate.from_template(self.prompt_template)
-        self.documents = ""
         self.embedding = Embedding()
     
     def get_actual_history(self, _):
@@ -30,11 +27,11 @@ class Assistant:
         """
         return self.history
     
-    def append_history(self, user_input: str):
+    def append_history(self, user_input: str, output: str = "", judge_output: str = ""):
         """
         f that appends the current input, output, and judge output to the conversation history.
         """
-        self.history += f"input = {user_input}, " + f"output = {self.output}, " + f"judge_output = {self.judge_output}"
+        self.history += f"input = {user_input}, " + f"output = {output}, " + f"judge_output = {judge_output}"
         return self.history
     
     def reset_history(self):
@@ -44,18 +41,19 @@ class Assistant:
         self.history = ""
         return self.history
     
-    def update_current_state(self, user_input: str):
+    def update_current_state(self, user_input: str, output: str = "", judge_output: str = "", documents: str = ""):
         """
         f that updates the current state dictionary to be passed to the LLM.
         """
 
-        self.current_state = {
+        current_state = {
             "input": user_input,
             "history": self.history,
-            "output": self.output,
-            "context": self.documents,
-            "judge_output": self.judge_output
+            "output": output,
+            "context": documents,
+            "judge_output": judge_output
         }
+        return current_state
     
     def get_context(self, user_input: str):
         """
@@ -68,10 +66,10 @@ class Assistant:
         min_score = 1.15
         docs_relevant = [doc for doc, score in docs if score < min_score]
         if not docs_relevant:
-            self.documents = "NO DOCS RELEVANT IN CONTEXT"
-            return self.documents
-        self.documents = ", ".join([doc.page_content for doc in docs_relevant])
-        return self.documents
+            documents = "NO DOCS RELEVANT IN CONTEXT"
+            return documents
+        documents = ", ".join([doc.page_content for doc in docs_relevant])
+        return documents
     
     def get_history_summary(self):
         """
@@ -84,29 +82,30 @@ class Assistant:
         Report only the meaning of the exchange, never the exact wording of any cited passage.
         history = {history}"""
         self.prompt_history_summary = PromptTemplate.from_template(self.template_history_summary)
-        self.history_summary_chain = self.prompt_history_summary | self.summary_llm | StrOutputParser()
-        self.history_summary = self.history_summary_chain.invoke(self.current_state)
-        return self.history_summary
+        history_summary_chain = self.prompt_history_summary | self.summary_llm | StrOutputParser()
+        history_summary = history_summary_chain.invoke({"history": self.history})
+        return history_summary
 
     def Ask(self, user_input: str, history_summary: str, answer_judge: str):
         """
         f that takes the user input, the history summary, and the judge's response as input, and returns the LLM's response and the current state.
         """
-        self.judge_output = answer_judge
-        self.update_current_state(user_input)
+        output = ""
+        documents = self.get_context(user_input)
+        judge_output = answer_judge
+        current_state = self.update_current_state(user_input, output, judge_output, documents)
 
         if history_summary != "":
             self.history = history_summary
             
-        self.chain_with_embedding = (
-            RunnablePassthrough.assign(history = self.get_actual_history,
-                                       context = itemgetter("input") | RunnableLambda(self.get_context))
+        chain_with_embedding = (
+            RunnablePassthrough.assign(history = self.get_actual_history)
             |self.prompt
             |self.llm
             |StrOutputParser()
         )
 
-        self.output = self.chain_with_embedding.invoke(self.current_state)
-        self.history = self.append_history(user_input)
-        self.update_current_state(user_input)
-        return self.output, self.current_state, self.documents
+        output = chain_with_embedding.invoke(current_state)
+        self.history = self.append_history(user_input, output, judge_output)
+        current_state = self.update_current_state(user_input, output, judge_output, documents)
+        return output, current_state, documents

@@ -8,8 +8,9 @@ path_for_vs = "vectorstore"
 class Embedding:
     def __init__(self):
         self.embedding_model = embedding_model
+        self.vectorstore = None
         self.path_documents = path_documents
-        self.splitter = RecursiveCharacterTextSplitter(chunk_size=850, chunk_overlap=200)
+        self.splitter = RecursiveCharacterTextSplitter(chunk_size=900, chunk_overlap=250)
 
     def load_documents(self):
         documents = []
@@ -24,7 +25,11 @@ class Embedding:
         print(f"Vectorstore saved in: {path}")
 
     def load_vectorstore(self):
+        if self.vectorstore is not None:
+            print("Vectorstore already loaded.")
+            return self.vectorstore
         vectorstore = FAISS.load_local(path_for_vs, self.embedding_model, allow_dangerous_deserialization=True)
+        self.vectorstore = vectorstore
         return vectorstore
 
     def do_embedding(self):
@@ -34,5 +39,4 @@ class Embedding:
         vectorstore = FAISS.from_documents(chunks, self.embedding_model)
         print("Done!")
         self.save_vectorstore(vectorstore, path_for_vs)
-        vectorstore = self.load_vectorstore()
-        return vectorstore
+        self.vectorstore = vectorstore

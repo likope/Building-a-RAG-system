@@ -5,3 +5,4 @@ PyMuPDF
 FAISS-gpu
 Pathlib
 gradio
+FastAPI
