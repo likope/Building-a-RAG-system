@@ -5,7 +5,7 @@ from pydantic import BaseModel  #valida
 from contextlib import asynccontextmanager
 from fastapi import Request
 from fastapi import HTTPException
-from main_but_gradio import Main
+from rag_core import Main
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

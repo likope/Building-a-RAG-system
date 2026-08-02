@@ -3,8 +3,9 @@ from path import path_documents
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
+import os
 
-path_for_vs = "vectorstore"
+path_for_vs = os.getenv("VECTORSTORE_PATH", "vectorstore")
 class Embedding:
     def __init__(self):
         self.embedding_model = embedding_model
