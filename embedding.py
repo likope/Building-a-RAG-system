@@ -44,6 +44,7 @@ class Embedding:
         docs = self.load_documents()
         print("start embedding")
         chunks = self.splitter.split_documents(docs)
+        chunks = [c for c in chunks if c.page_content and c.page_content.strip()]
         vectorstore = FAISS.from_documents(chunks, self.embedding_model)
         print("Done!")
         self.save_vectorstore(vectorstore, path_for_vs)
