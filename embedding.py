@@ -18,6 +18,9 @@ class Embedding:
         for pdf_path in sorted(self.path_documents.glob("*.pdf")):
             print(f"Upload file: {pdf_path}")
             documents.extend(PyMuPDFLoader(pdf_path).load())
+        if documents is None or len(documents) == 0:
+            print("Nessun documento trovato")
+            return None
         return documents
     
     def save_vectorstore(self, vectorstore, path):
@@ -29,7 +32,11 @@ class Embedding:
         if self.vectorstore is not None:
             print("Vectorstore already loaded.")
             return self.vectorstore
-        vectorstore = FAISS.load_local(path_for_vs, self.embedding_model, allow_dangerous_deserialization=True)
+        try:
+            vectorstore = FAISS.load_local(path_for_vs, self.embedding_model, allow_dangerous_deserialization=True)
+        except (RuntimeError, ValueError, OSError) as e:
+            print(f"Vectorstore non caricato da {path_for_vs}: {e}")
+            return None
         self.vectorstore = vectorstore
         return vectorstore
 

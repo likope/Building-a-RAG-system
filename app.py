@@ -10,7 +10,12 @@ from rag_core import Main
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     main = Main()
-    main.assistant.embedding.load_vectorstore()
+    vectorstore = main.assistant.embedding.load_vectorstore()
+    if vectorstore is None:
+        documents = main.embedding.do_embedding()
+        if documents is None:
+            print("Nessun documento trovato")
+
     print("Inizializzati i documenti")
     app.state.main = main
     yield
