@@ -42,10 +42,21 @@ class Embedding:
 
     def do_embedding(self):
         docs = self.load_documents()
+        if docs is None:
+            print("Nessun documento da embeddare")
+            return None
         print("start embedding")
         chunks = self.splitter.split_documents(docs)
         chunks = [c for c in chunks if c.page_content and c.page_content.strip()]
-        vectorstore = FAISS.from_documents(chunks, self.embedding_model)
+        print(f"[ingest] chunk validi: {len(chunks)}")
+        vectorstore = None
+        for i in range(0, len(chunks), 16):
+            batch = chunks[i:i + 16]
+            print(f"[ingest] batch {i}-{i + len(batch)}")
+            if vectorstore is None:
+                vectorstore = FAISS.from_documents(batch, self.embedding_model)
+            else:
+                vectorstore.add_documents(batch)
         print("Done!")
         self.save_vectorstore(vectorstore, path_for_vs)
         self.vectorstore = vectorstore
