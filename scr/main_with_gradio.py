@@ -1,6 +1,6 @@
 import gradio as gr
 
-from rag_core import Main
+from scr.rag_core import Main
 
 if __name__ == "__main__":
     main = Main()

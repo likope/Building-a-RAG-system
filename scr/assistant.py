@@ -1,12 +1,12 @@
-from client_assistant import params_llm
-from langchain_core.prompts import PromptTemplate
-from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.output_parsers import StrOutputParser
-from embedding import Embedding
-from operator import itemgetter
+from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+
+from scr.client_assistant import params_llm
+from scr.embedding import Embedding
+
 
 class Assistant:
-
     def __init__(self):
         """
         Costructor of Assistant class, which initializes the necessary attributes for the conversation with the LLM.
@@ -20,27 +20,27 @@ class Assistant:
         context = {context},"""
         self.prompt = PromptTemplate.from_template(self.prompt_template)
         self.embedding = Embedding()
-    
+
     def get_actual_history(self, _):
         """
         f that returns the current conversation history.
         """
         return self.history
-    
+
     def append_history(self, user_input: str, output: str = "", judge_output: str = ""):
         """
         f that appends the current input, output, and judge output to the conversation history.
         """
         self.history += f"input = {user_input}, " + f"output = {output}, " + f"judge_output = {judge_output}"
         return self.history
-    
+
     def reset_history(self):
         """
         f that resets the conversation history.
         """
         self.history = ""
         return self.history
-    
+
     def update_current_state(self, user_input: str, output: str = "", judge_output: str = "", documents: str = ""):
         """
         f that updates the current state dictionary to be passed to the LLM.
@@ -51,10 +51,10 @@ class Assistant:
             "history": self.history,
             "output": output,
             "context": documents,
-            "judge_output": judge_output
+            "judge_output": judge_output,
         }
         return current_state
-    
+
     def get_context(self, user_input: str):
         """
         f che si occupa di restituire il contesto in base alla query dell utente.
@@ -70,13 +70,15 @@ class Assistant:
             return documents
         documents = ", ".join([doc.page_content for doc in docs_relevant])
         return documents
-    
+
     def get_history_summary(self):
         """
         f that generates a summary of the conversation history to be passed to the LLM.
         """
         self.summary_llm = params_llm(temperature=0.1)
-        self.template_history_summary = self.template_history_summary = """You are summarizing a conversation history for another LLM.
+        self.template_history_summary = (
+            self.template_history_summary
+        ) = """You are summarizing a conversation history for another LLM.
         Write a brief summary that captures what the user asked and what was answered, IN YOUR OWN WORDS.
         Do NOT include any direct quotes, quoted text, or page references from the documents.
         Report only the meaning of the exchange, never the exact wording of any cited passage.
@@ -97,12 +99,9 @@ class Assistant:
 
         if history_summary != "":
             self.history = history_summary
-            
+
         chain_with_embedding = (
-            RunnablePassthrough.assign(history = self.get_actual_history)
-            |self.prompt
-            |self.llm
-            |StrOutputParser()
+            RunnablePassthrough.assign(history=self.get_actual_history) | self.prompt | self.llm | StrOutputParser()
         )
 
         output = chain_with_embedding.invoke(current_state)

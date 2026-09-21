@@ -1,11 +1,12 @@
-from fastapi import FastAPI
-import httpx
-from ollama import ResponseError
-from pydantic import BaseModel  #valida
 from contextlib import asynccontextmanager
-from fastapi import Request
-from fastapi import HTTPException
-from rag_core import Main
+
+import httpx
+from fastapi import FastAPI, HTTPException, Request
+from ollama import ResponseError
+from pydantic import BaseModel  # valida
+
+from scr.rag_core import Main
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,22 +22,27 @@ async def lifespan(app: FastAPI):
     yield
     print("Spegnimento")
 
+
 app = FastAPI(lifespan=lifespan)
 
-@app.get("/health") 
+
+@app.get("/health")
 def health():
-    return {"status": "ok"} #json
+    return {"status": "ok"}  # json
+
 
 class QueryRequest(BaseModel):
-    question: str   #è lo schema del json, è obbligatorio
+    question: str  # è lo schema del json, è obbligatorio
+
 
 class QueryResponse(BaseModel):
     answer: str
     judge_output: str
     documents: str
 
+
 @app.post("/query")
-def query(req:QueryRequest, request: Request) -> QueryResponse:
+def query(req: QueryRequest, request: Request) -> QueryResponse:
     main = request.app.state.main
     try:
         answer_llm, answer_judge, documents = main.run_turn(req.question)

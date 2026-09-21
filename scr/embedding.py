@@ -4,8 +4,8 @@ from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from client_embedding import embedding_model
-from path import path_documents
+from scr.client_embedding import embedding_model
+from scr.path import path_documents
 
 path_for_vs = os.getenv("VECTORSTORE_PATH", "vectorstore")
 
@@ -48,7 +48,7 @@ class Embedding:
         docs = self.load_documents()
         if docs is None:
             print("Nessun documento da embeddare")
-            return None
+            return None  # noqa: RET501
         print("start embedding")
         chunks = self.splitter.split_documents(docs)
         chunks = [c for c in chunks if c.page_content and c.page_content.strip()]

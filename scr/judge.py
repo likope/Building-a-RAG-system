@@ -1,10 +1,10 @@
-from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from client_assistant import params_llm
+from langchain_core.prompts import PromptTemplate
+
+from scr.client_assistant import params_llm
 
 
 class Judge:
-
     def __init__(self):
         """
         constructor of Judge class, which initializes the necessary attributes for the evaluation of the LLM's response.
@@ -24,7 +24,7 @@ class Judge:
         """
         f that is responsible for evaluating the current response of the LLM by a judge LLM.
         """
-        
+
         judge_chain = self.prompt_judge | self.llm | StrOutputParser()
         judge_output = judge_chain.invoke(current_state)
         return judge_output

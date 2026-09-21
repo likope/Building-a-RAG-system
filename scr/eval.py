@@ -1,10 +1,12 @@
-from assistant import Assistant
 import re
+
+from scr.assistant import Assistant
+
 
 class Eval:
     def __init__(self):
         pass
-    
+
     def normalize_text(self, text: str):
         """
         f that normalizes the text by removing line breaks, hyphens, and extra spaces.
@@ -18,7 +20,7 @@ class Eval:
         """
         f that evaluates the output of the LLM by checking if all the quoted citations in the output are present in the context. It ignores citations that contain mathematical symbols.
         """
-        simbols_math = {"∫", "Γ", "√"}  
+        simbols_math = {"∫", "Γ", "√"}
         context = current_state["context"]
         output = current_state["output"]
         cit = re.findall(r'"([^"]*)"', output)
@@ -42,7 +44,7 @@ class Eval:
             return accuracy, answer, cit
         else:
             return None, None, None
-        
+
     def evaluate_judge(self, current_state):
         """"""
         result_parser = self.parser(current_state)
