@@ -1,11 +1,15 @@
-from client_embedding import embedding_model
-from path import path_documents
-from langchain_community.document_loaders import PyMuPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS
 import os
 
+from langchain_community.document_loaders import PyMuPDFLoader
+from langchain_community.vectorstores import FAISS
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+from client_embedding import embedding_model
+from path import path_documents
+
 path_for_vs = os.getenv("VECTORSTORE_PATH", "vectorstore")
+
+
 class Embedding:
     def __init__(self):
         self.embedding_model = embedding_model
@@ -22,7 +26,7 @@ class Embedding:
             print("Nessun documento trovato")
             return None
         return documents
-    
+
     def save_vectorstore(self, vectorstore, path):
         print("Path: ", path)
         vectorstore.save_local(path)
@@ -51,7 +55,7 @@ class Embedding:
         print(f"[ingest] chunk validi: {len(chunks)}")
         vectorstore = None
         for i in range(0, len(chunks), 16):
-            batch = chunks[i:i + 16]
+            batch = chunks[i : i + 16]
             print(f"[ingest] batch {i}-{i + len(batch)}")
             if vectorstore is None:
                 vectorstore = FAISS.from_documents(batch, self.embedding_model)
