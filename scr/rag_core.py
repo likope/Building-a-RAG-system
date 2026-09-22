@@ -1,7 +1,7 @@
-from scr.assistant import Assistant
-from scr.embedding import Embedding
-from scr.eval import Eval
-from scr.judge import Judge
+from assistant import Assistant
+from embedding import Embedding
+from eval import Eval
+from judge import Judge
 
 
 class Main:
@@ -21,10 +21,10 @@ class Main:
         return "Context reloaded."
 
     def run_turn(self, user_input):
+        # if number of turns exceeds the limit, do a summary of the history
         if self.n_turns > self.limit_history_turn:
             self.history_summary = self.assistant.get_history_summary()
             self.n_turns = 1
-        print(self.judge_answer)
         answer_llm, current_state, documents = self.assistant.Ask(user_input, self.history_summary, self.judge_answer)
         self.history_summary = ""
         answer_judge = self.judge.get_evaluation(current_state)

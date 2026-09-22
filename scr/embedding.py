@@ -1,13 +1,8 @@
-import os
-
+from client.client_embedding import embedding_model
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-
-from scr.client_embedding import embedding_model
-from scr.path import path_documents
-
-path_for_vs = os.getenv("VECTORSTORE_PATH", "vectorstore")
+from path import path_documents, path_for_vs
 
 
 class Embedding:
@@ -33,6 +28,7 @@ class Embedding:
         print(f"Vectorstore saved in: {path}")
 
     def load_vectorstore(self):
+
         if self.vectorstore is not None:
             print("Vectorstore already loaded.")
             return self.vectorstore
@@ -40,7 +36,8 @@ class Embedding:
             vectorstore = FAISS.load_local(path_for_vs, self.embedding_model, allow_dangerous_deserialization=True)
         except (RuntimeError, ValueError, OSError) as e:
             print(f"Vectorstore non caricato da {path_for_vs}: {e}")
-            return None
+            vectorstore.mkdir(path_for_vs)
+            print(f"Vectorstore directory created: {path_for_vs}")
         self.vectorstore = vectorstore
         return vectorstore
 
@@ -52,7 +49,7 @@ class Embedding:
         print("start embedding")
         chunks = self.splitter.split_documents(docs)
         chunks = [c for c in chunks if c.page_content and c.page_content.strip()]
-        print(f"[ingest] chunk validi: {len(chunks)}")
+        print(f"[ingest] valid chunck: {len(chunks)}")
         vectorstore = None
         for i in range(0, len(chunks), 16):
             batch = chunks[i : i + 16]

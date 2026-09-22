@@ -1,7 +1,5 @@
 import re
 
-from scr.assistant import Assistant
-
 
 class Eval:
     def __init__(self):

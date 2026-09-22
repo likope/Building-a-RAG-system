@@ -1,9 +1,8 @@
+from client.client_assistant import params_llm
+from embedding import Embedding
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnablePassthrough
-
-from scr.client_assistant import params_llm
-from scr.embedding import Embedding
 
 
 class Assistant:

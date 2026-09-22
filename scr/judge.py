@@ -1,7 +1,6 @@
+from client.client_assistant import params_llm
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
-
-from scr.client_assistant import params_llm
 
 
 class Judge:

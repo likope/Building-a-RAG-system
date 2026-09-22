@@ -1,6 +1,5 @@
 import gradio as gr
-
-from scr.rag_core import Main
+from rag_core import Main
 
 if __name__ == "__main__":
     main = Main()
@@ -11,10 +10,8 @@ if __name__ == "__main__":
         out_judge = gr.Textbox(label="Judge")
         documents = gr.Textbox(label="Context")
 
-        reload_btn = gr.Button("Reload context")
         status = gr.Textbox(label="Status")
 
         send.click(main.run_turn, inputs=inp, outputs=[out_llm, out_judge, documents])
-        reload_btn.click(main.reload_context, inputs=None, outputs=status)
 
     demo.launch(server_name="0.0.0.0")
