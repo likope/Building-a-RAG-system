@@ -18,3 +18,6 @@ It uses ollama with deepseekR1-8B model, and bge 3 embedding model, but can be c
 
 # Research:
 I'm working on research with the self-preference bias when the assistant and judge have the same model, for this I've built a ground-truth function that verifies the verbatim citations of assistant answer and context and the judge exhibited bias in 12 of 14 runs, please choose different model for assistant and judge.
+
+# Update:
+- The model of the various LLM can be select via request POST with the variable "model";
