@@ -56,7 +56,7 @@ class Assistant:
 
     def get_context(self, user_input: str):
         """
-        f che si occupa di restituire il contesto in base alla query dell utente.
+        f that get context in base of the query.
         """
         vectorstore = self.embedding.load_vectorstore()
         docs = vectorstore.similarity_search_with_score(user_input, k=5)

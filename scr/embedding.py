@@ -2,7 +2,7 @@ from client.client_embedding import embedding_model
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from path import path_documents, path_for_vs
+from path import path_base, path_documents, path_for_vs
 
 
 class Embedding:
@@ -10,7 +10,7 @@ class Embedding:
         self.embedding_model = embedding_model
         self.vectorstore = None
         self.path_documents = path_documents
-        self.splitter = RecursiveCharacterTextSplitter(chunk_size=900, chunk_overlap=250)
+        self.splitter = RecursiveCharacterTextSplitter(chunk_size=750, chunk_overlap=250)
 
     def load_documents(self):
         documents = []
@@ -18,17 +18,15 @@ class Embedding:
             print(f"Upload file: {pdf_path}")
             documents.extend(PyMuPDFLoader(pdf_path).load())
         if documents is None or len(documents) == 0:
-            print("Nessun documento trovato")
+            print("No documents found in the 'documents' directory. Please add PDF files to the 'documents' directory.")
             return None
         return documents
 
-    def save_vectorstore(self, vectorstore, path):
-        print("Path: ", path)
-        vectorstore.save_local(path)
-        print(f"Vectorstore saved in: {path}")
+    def save_vectorstore(self, vectorstore):
+        vectorstore.save_local(path_base)
+        print(f"Vectorstore saved in: {path_base}/vectorstore")
 
     def load_vectorstore(self):
-
         if self.vectorstore is not None:
             print("Vectorstore already loaded.")
             return self.vectorstore
@@ -36,15 +34,16 @@ class Embedding:
             vectorstore = FAISS.load_local(path_for_vs, self.embedding_model, allow_dangerous_deserialization=True)
         except (RuntimeError, ValueError, OSError) as e:
             print(f"Vectorstore non caricato da {path_for_vs}: {e}")
-            vectorstore.mkdir(path_for_vs)
+            path_for_vs.mkdir(parents=True, exist_ok=True)
             print(f"Vectorstore directory created: {path_for_vs}")
+            return 2
         self.vectorstore = vectorstore
         return vectorstore
 
     def do_embedding(self):
         docs = self.load_documents()
         if docs is None:
-            print("Nessun documento da embeddare")
+            print("No documents found in the 'documents' directory. Please add PDF files to the 'documents' directory.")
             return None  # noqa: RET501
         print("start embedding")
         chunks = self.splitter.split_documents(docs)
